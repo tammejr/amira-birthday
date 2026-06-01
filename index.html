@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="preload" href="audio/afrobeat.m4a" as="fetch" type="audio/mp4" crossorigin="anonymous" />
 </head>
 <body>
   <div id="cursor-sparkles" aria-hidden="true"></div>
@@ -131,7 +132,7 @@
     <div class="page-inner">
       <h2>Choose your birthday power</h2>
       <p class="game-sub">June 1 upgrade package — pick one, Princess</p>
-      <p class="game-music-hint">Tap <strong>Afrobeat</strong> — music plays through the <em>whole</em> birthday (she can ⏹ stop anytime)</p>
+      <p class="game-music-hint">Pick <strong>Afrobeat</strong> — song loads in the background while she plays. When the button says <strong>▶ Tap to play</strong>, she's good.</p>
       <div class="power-grid">
         <button class="power-card" data-power="noodles">
           <span class="power-icon">☕</span>
@@ -308,6 +309,10 @@
   <div id="tap-ripples" aria-hidden="true"></div>
   <div id="float-emoji-layer" aria-hidden="true"></div>
 
+  <div id="music-preload-pill" class="music-preload-pill hidden" aria-live="polite">
+    <span id="music-pill-text">🎵 Loading song…</span>
+  </div>
+
   <button type="button" id="sound-toggle" class="sound-toggle" title="Sound on/off" aria-label="Toggle sound">
     <span class="sound-on">🔊</span>
     <span class="sound-off hidden">🔇</span>
@@ -323,19 +328,24 @@
     👑 PRINCESS MODE UNLOCKED — PUBG bot aura +1000
   </div>
 
-  <!-- Sticky soundtrack — stays on every page after Afrobeat power -->
+  <!-- Sticky soundtrack — one big tap to play (works on phone + Vercel) -->
   <div id="music-dock" class="music-dock hidden" aria-label="Birthday soundtrack">
+    <audio id="afrobeat-player" preload="auto" playsinline>
+      <source src="audio/afrobeat.m4a" type="audio/mp4" />
+      <source src="audio/afrobeat.mp3" type="audio/mpeg" />
+    </audio>
     <div class="music-dock-inner">
-      <span class="music-dock-icon" aria-hidden="true">🎶</span>
-      <div class="music-dock-text">
-        <span class="music-dock-title">Princess soundtrack</span>
-        <span class="music-dock-hint">Plays through the whole gift · ⏹ to stop</span>
+      <p class="music-dock-label">🎶 Princess soundtrack · plays the whole birthday</p>
+      <div id="music-load-wrap" class="music-load-wrap">
+        <p id="music-load-text" class="music-load-text">Loading song in background…</p>
+        <div class="music-load-bar" aria-hidden="true"><div id="music-load-fill" class="music-load-fill"></div></div>
       </div>
-      <audio id="afrobeat-player" controls preload="metadata" playsinline>
-        <source src="audio/afrobeat.m4a" type="audio/mp4" />
-        <source src="audio/afrobeat.mp3" type="audio/mpeg" />
-      </audio>
-      <button type="button" id="btn-stop-music" class="btn-stop-music" title="Stop music">⏹</button>
+      <button type="button" id="btn-start-music" class="btn-start-music is-loading" disabled>⏳ Loading song…</button>
+      <div id="music-dock-controls" class="music-dock-controls hidden">
+        <span class="music-status" id="music-status">Playing…</span>
+        <button type="button" id="btn-pause-music" class="btn-music-ctrl" title="Pause">⏸</button>
+        <button type="button" id="btn-stop-music" class="btn-music-ctrl" title="Stop">⏹ Stop</button>
+      </div>
     </div>
   </div>
 

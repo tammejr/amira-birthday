@@ -53,85 +53,161 @@ body {
   to { transform: translateY(0); opacity: 1; }
 }
 
+#afrobeat-player {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .music-dock-inner {
   pointer-events: auto;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  max-width: 520px;
+  max-width: 420px;
   margin: 0 auto;
-  padding: 0.6rem 0.85rem;
-  background: rgba(20, 20, 22, 0.97);
-  border: 1px solid rgba(196, 30, 58, 0.5);
-  border-radius: 14px;
-  box-shadow: 0 -8px 40px rgba(196, 30, 58, 0.2), 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 0.85rem 1rem;
+  background: rgba(20, 20, 22, 0.98);
+  border: 1px solid rgba(196, 30, 58, 0.55);
+  border-radius: 16px;
+  box-shadow: 0 -8px 40px rgba(196, 30, 58, 0.25), 0 8px 32px rgba(0, 0, 0, 0.5);
+  text-align: center;
 }
 
-.music-dock-icon {
-  font-size: 1.25rem;
-  animation: afrobeat-pulse 0.8s ease infinite;
-}
-
-.music-dock-text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-
-.music-dock-title {
+.music-dock-label {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--cherry-glow);
-  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin-bottom: 0.65rem;
 }
 
-.music-dock-hint {
-  font-size: 0.6rem;
+.music-load-wrap {
+  margin-bottom: 0.65rem;
+}
+
+.music-load-text {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+  font-family: var(--font-mono);
+}
+
+.music-load-bar {
+  height: 4px;
+  background: var(--black-soft);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.music-load-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--cherry-dim), var(--cherry-glow));
+  transition: width 0.25s ease;
+}
+
+.music-load-wrap.is-ready .music-load-text {
+  color: var(--cherry-glow);
+}
+
+.btn-start-music {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cream);
+  background: linear-gradient(135deg, var(--cherry), var(--cherry-glow));
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 28px rgba(196, 30, 58, 0.45);
+  animation: play-btn-pulse 1.5s ease-in-out infinite;
+}
+
+.btn-start-music:disabled {
+  cursor: wait;
+  opacity: 0.85;
+  animation: none;
+  background: var(--black-soft);
+  border: 1px solid var(--cherry-dim);
   color: var(--muted);
 }
 
-#afrobeat-player {
-  width: 120px;
-  height: 36px;
-  flex-shrink: 0;
-  border-radius: 8px;
+.btn-start-music:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(232, 42, 79, 0.55);
 }
 
-#afrobeat-player::-webkit-media-controls-panel {
-  background: var(--black-soft);
+@keyframes play-btn-pulse {
+  0%, 100% { box-shadow: 0 6px 28px rgba(196, 30, 58, 0.45); }
+  50% { box-shadow: 0 6px 36px rgba(232, 42, 79, 0.7); }
 }
 
-.btn-stop-music {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--cherry);
-  background: rgba(196, 30, 58, 0.2);
+.music-dock-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.music-dock-controls.hidden { display: none; }
+
+.btn-start-music.hidden { display: none; }
+
+.music-status {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--cherry-glow);
+  flex: 1;
+  text-align: left;
+  min-width: 100px;
+}
+
+.btn-music-ctrl {
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--cherry-dim);
+  background: rgba(196, 30, 58, 0.15);
   color: var(--cream);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.2s;
 }
 
-.btn-stop-music:hover {
+.btn-music-ctrl:hover {
   background: var(--cherry);
-  transform: scale(1.05);
 }
 
 body.has-music-dock .fake-toast {
-  bottom: 5.5rem;
+  bottom: 6.5rem;
 }
 
 body.has-music-dock .dog-easter {
-  bottom: 5.5rem;
+  bottom: 6.5rem;
 }
 
-@media (max-width: 480px) {
-  .music-dock-hint { display: none; }
-  #afrobeat-player { width: 90px; }
+.music-preload-pill {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 240;
+  padding: 0.4rem 0.85rem;
+  background: rgba(20, 20, 22, 0.92);
+  border: 1px solid rgba(196, 30, 58, 0.4);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--cherry-glow);
+  pointer-events: none;
+  animation: dock-slide-up 0.4s ease;
+}
+
+.music-preload-pill.hidden { display: none; }
+
+body.has-music-dock .music-preload-pill {
+  display: none !important;
 }
 
 #cursor-sparkles {

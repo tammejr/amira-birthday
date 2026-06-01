@@ -19,6 +19,8 @@ It appears on the final page under “A little wish for you”.
 
 **If music won’t play:** Your file might be M4A saved as `.mp3`. Rename it to **`afrobeat.m4a`** (same file, correct extension), or convert with [CloudConvert](https://cloudconvert.com/mp3-converter).
 
+**Slow loading on phone data?** Your full song is ~3.7MB — that takes time to download. For Amira on mobile, use a **shorter clip (60–90 seconds)** or compress at [CloudConvert](https://cloudconvert.com/m4a-converter) (lower bitrate). Aim for **under 1 MB** — loads almost instantly. The site shows **Loading song X%** and starts preloading from page 1.
+
 Royalty-free option: [Pixabay Afrobeat](https://pixabay.com/music/search/afrobeat/) — download MP3.
 
 ## Add her photos & café background

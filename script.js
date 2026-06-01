@@ -20,6 +20,8 @@
   let confettiEngine = null;
   let afrobeatReady = false;
   let afrobeatSoundtrackOn = false;
+  let musicPreloadStarted = false;
+  let musicPlayWhenReady = false;
 
   const powerResponses = {
     noodles: "Unlimited noodles unlocked. PUBG squad will never understand your carb power. Ramen aura: +999. 😭",
@@ -105,26 +107,109 @@
   function showMusicDock(show) {
     $("#music-dock")?.classList.toggle("hidden", !show);
     document.body.classList.toggle("has-music-dock", show);
+    if (show) $("#music-preload-pill")?.classList.add("hidden");
   }
 
   function initAfrobeatSrc() {
     const a = getAfrobeatEl();
     if (!a) return;
+    const m4a = new URL("audio/afrobeat.m4a", window.location.href).href;
+    const mp3 = new URL("audio/afrobeat.mp3", window.location.href).href;
+    const sources = a.querySelectorAll("source");
+    if (sources[0]) sources[0].src = m4a;
+    if (sources[1]) sources[1].src = mp3;
+    a.preload = "auto";
     a.load();
   }
 
-  function preloadAfrobeat() {
+  function getMusicBufferedPercent() {
+    const a = getAfrobeatEl();
+    if (!a || !a.duration || !isFinite(a.duration) || a.buffered.length === 0) return 0;
+    try {
+      const end = a.buffered.end(a.buffered.length - 1);
+      return Math.min(100, Math.round((end / a.duration) * 100));
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  function isMusicReadyToPlay() {
+    const a = getAfrobeatEl();
+    if (!a) return false;
+    if (afrobeatReady) return true;
+    return a.readyState >= 2 || getMusicBufferedPercent() >= 8;
+  }
+
+  function updateMusicLoadUI() {
+    const pct = getMusicBufferedPercent();
+    const ready = isMusicReadyToPlay();
+    const fill = $("#music-load-fill");
+    const loadText = $("#music-load-text");
+    const btn = $("#btn-start-music");
+    const wrap = $("#music-load-wrap");
+    const pill = $("#music-preload-pill");
+    const pillText = $("#music-pill-text");
+
+    if (fill) fill.style.width = `${pct}%`;
+
+    if (!afrobeatSoundtrackOn && !ready && musicPreloadStarted) {
+      pill?.classList.remove("hidden");
+      if (pillText) {
+        pillText.textContent =
+          pct > 0 ? `🎵 Loading song ${pct}% — Wi‑Fi helps` : "🎵 Loading song…";
+      }
+    } else if (ready) {
+      pill?.classList.add("hidden");
+    }
+
+    if (ready) {
+      afrobeatReady = true;
+      wrap?.classList.add("is-ready");
+      if (loadText) loadText.textContent = "Song ready — tap play 🎶";
+      if (btn) {
+        btn.disabled = false;
+        btn.classList.remove("is-loading");
+        btn.textContent = "▶ Tap to play music";
+      }
+      if (musicPlayWhenReady) {
+        musicPlayWhenReady = false;
+        startMusicFromTap();
+      }
+    } else if (btn) {
+      btn.disabled = true;
+      btn.classList.add("is-loading");
+      btn.textContent = pct > 0 ? `⏳ Loading song… ${pct}%` : "⏳ Loading song…";
+      if (loadText) {
+        loadText.textContent =
+          pct > 0
+            ? `Loading soundtrack… ${pct}% (slow data is OK)`
+            : "Loading soundtrack… stay on Wi‑Fi if you can";
+      }
+    }
+  }
+
+  function startEarlyMusicPreload() {
+    if (musicPreloadStarted) return;
+    musicPreloadStarted = true;
     initAfrobeatSrc();
+    preloadAfrobeat();
+    updateMusicLoadUI();
+  }
+
+  function updateMusicDockUI(playing) {
+    $("#btn-start-music")?.classList.toggle("hidden", playing);
+    $("#music-dock-controls")?.classList.toggle("hidden", !playing);
+    const status = $("#music-status");
+    if (status) {
+      status.textContent = playing ? "Now playing 🎶" : "";
+    }
+  }
+
+  function preloadAfrobeat() {
+    startEarlyMusicPreload();
     const a = getAfrobeatEl();
     if (!a) return;
     a.volume = 1;
-    if (!afrobeatReady) {
-      const onReady = () => {
-        afrobeatReady = true;
-      };
-      a.addEventListener("canplaythrough", onReady, { once: true });
-      a.addEventListener("loadeddata", onReady, { once: true });
-    }
   }
 
   function afrobeatErrorMessage() {
@@ -132,34 +217,61 @@
     const code = a?.error?.code;
     if (code === 4) return "File not found — add audio/afrobeat.m4a or afrobeat.mp3";
     if (code === 3) return "Wrong format — rename your file to afrobeat.m4a (see README) or convert to MP3";
-    if (code === 2) return "Network error — open site via http://localhost:3456 not file://";
+    if (code === 2) return "Music file didn't load — check audio/afrobeat.m4a is on the site";
     return "Music didn't load — tap ▶ Play beat now or use browser player below";
   }
 
-  /** play() must run in the same click/tap — no await before it */
-  function playAfrobeat() {
+  /** Call play() directly inside a click handler — required on mobile + Vercel */
+  function startMusicFromTap() {
     initAudio();
     preloadAfrobeat();
     const a = getAfrobeatEl();
     if (!a) return;
 
+    if (!SoundFX.isEnabled()) {
+      showFakeToast("Tap 🔊 top-right to unmute first");
+      return;
+    }
+
     afrobeatSoundtrackOn = true;
     showMusicDock(true);
-    $("#power-afrobeat")?.classList.add("playing");
-    a.volume = SoundFX.isEnabled() ? 1 : 0.8;
+    a.volume = 1;
+
+    if (!isMusicReadyToPlay()) {
+      musicPlayWhenReady = true;
+      updateMusicLoadUI();
+      showFakeToast("Loading song… plays automatically when ready 🎵");
+      return;
+    }
 
     const p = a.play();
     if (p && typeof p.then === "function") {
-      p.then(() =>
-        showFakeToast("🎶 Soundtrack ON — follows you the whole way. ⏹ to stop")
-      ).catch(() => {
-        showFakeToast("Tap play on the bar at the bottom 🎵");
+      p.then(() => {
+        updateMusicDockUI(true);
+        $("#power-afrobeat")?.classList.add("playing");
+        showFakeToast("🎶 Soundtrack ON — keeps playing as you go");
+      }).catch(() => {
+        updateMusicDockUI(false);
+        showFakeToast("Tap ▶ Tap to play music when the button turns red");
       });
+    } else {
+      updateMusicDockUI(!a.paused);
     }
+  }
+
+  function playAfrobeat() {
+    afrobeatSoundtrackOn = true;
+    showMusicDock(true);
+    updateMusicLoadUI();
+    $("#power-afrobeat")?.classList.add("selected");
+    startMusicFromTap();
   }
 
   function pauseAfrobeat() {
     getAfrobeatEl()?.pause();
+    updateMusicDockUI(false);
+    $("#btn-start-music")?.classList.remove("hidden");
+    $("#music-dock-controls")?.classList.add("hidden");
     $("#power-afrobeat")?.classList.remove("playing");
   }
 
@@ -173,6 +285,7 @@
       } catch (_) {}
     }
     showMusicDock(false);
+    updateMusicDockUI(false);
     $("#power-afrobeat")?.classList.remove("playing", "selected");
   }
 
@@ -180,22 +293,48 @@
     const a = getAfrobeatEl();
     if (!a) return;
     initAfrobeatSrc();
+    startEarlyMusicPreload();
+
+    a.addEventListener("progress", updateMusicLoadUI);
+    a.addEventListener("loadedmetadata", updateMusicLoadUI);
+    a.addEventListener("canplay", updateMusicLoadUI);
+    a.addEventListener("canplaythrough", () => {
+      afrobeatReady = true;
+      updateMusicLoadUI();
+    });
+
     a.addEventListener("error", () => {
-      if (afrobeatSoundtrackOn) showMusicDock(true);
+      showMusicDock(true);
+      updateMusicDockUI(false);
       showFakeToast(afrobeatErrorMessage());
     });
     a.addEventListener("ended", () => {
+      updateMusicDockUI(false);
       $("#power-afrobeat")?.classList.remove("playing");
     });
     a.addEventListener("play", () => {
+      updateMusicDockUI(true);
       $("#power-afrobeat")?.classList.add("playing");
     });
+    a.addEventListener("pause", () => {
+      if (!a.ended) updateMusicDockUI(false);
+    });
+
+    $("#btn-start-music")?.addEventListener("click", () => {
+      startMusicFromTap();
+    });
+
+    $("#btn-pause-music")?.addEventListener("click", () => {
+      pauseAfrobeat();
+    });
+
     $("#btn-stop-music")?.addEventListener("click", () => {
       stopAfrobeat();
-      showFakeToast("Soundtrack stopped — silence restored 😭");
+      showFakeToast("Soundtrack stopped 😭");
     });
   }
   setupAfrobeatPlayer();
+  startEarlyMusicPreload();
 
   // Global tap ripples + emoji on interactive elements (sounds handled per-action)
   document.addEventListener(
@@ -309,9 +448,10 @@
     }
   });
 
-  // Boot → Page 1
+  // Boot → Page 1 (start loading music early while she reads/plays)
   setTimeout(() => {
     SoundFX.boot();
+    startEarlyMusicPreload();
     $("#boot-screen").classList.add("fade-out");
     showPage("page-1");
     setTimeout(() => $("#boot-screen").remove(), 900);
@@ -646,12 +786,10 @@
     "click",
     () => {
       initAudio();
-      preloadAfrobeat();
+      startEarlyMusicPreload();
     },
     { once: true }
   );
-
-  initAfrobeatSrc();
 
   // Floating particles
   const canvas = $("#particles-canvas");
