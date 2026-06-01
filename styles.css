@@ -98,7 +98,7 @@ body.has-music-dock .page.active {
 
 .page4-music {
   position: relative;
-  z-index: 20;
+  z-index: 220;
   margin: 1.25rem auto;
   padding: 1.25rem 1.5rem;
   max-width: 400px;
@@ -123,6 +123,11 @@ body.has-music-dock .page.active {
 
 .music-controls.hidden { display: none; }
 
+.music-controls button {
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
 .music-controls-dock {
   max-width: none;
   margin-top: 0;
@@ -142,6 +147,7 @@ body.has-music-dock .page.active {
   transition: background 0.2s, border-color 0.2s, color 0.2s;
   width: 100%;
   margin: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-music-secondary {
@@ -180,7 +186,7 @@ body.has-music-dock .page.active {
 
 #btn-power-next {
   position: relative;
-  z-index: 210;
+  z-index: 1;
   margin-top: 1.25rem;
 }
 

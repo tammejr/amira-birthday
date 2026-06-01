@@ -24,6 +24,7 @@
   let musicPlayQueued = false;
   let afrobeatSrcInited = false;
   let musicUserPaused = false;
+  let musicIsPlaying = false;
 
   const powerResponses = {
     noodles: "Unlimited noodles unlocked. PUBG squad will never understand your carb power. Ramen aura: +999. 😭",
@@ -179,6 +180,7 @@
 
   function setMusicPlayingUI() {
     musicUserPaused = false;
+    musicIsPlaying = true;
     $("#btn-start-music")?.classList.add("hidden");
     $("#music-controls-row")?.classList.remove("hidden");
     $("#power-afrobeat")?.classList.add("playing");
@@ -190,6 +192,8 @@
   }
 
   function setMusicPausedUI() {
+    musicUserPaused = true;
+    musicIsPlaying = false;
     $("#btn-start-music")?.classList.add("hidden");
     $("#music-controls-row")?.classList.remove("hidden");
     $("#power-afrobeat")?.classList.remove("playing");
@@ -201,6 +205,7 @@
 
   function setMusicStoppedUI() {
     musicUserPaused = false;
+    musicIsPlaying = false;
     $("#btn-start-music")?.classList.remove("hidden");
     $("#music-controls-row")?.classList.add("hidden");
     $("#power-afrobeat")?.classList.remove("playing");
@@ -209,13 +214,34 @@
     showMusicDock(false);
   }
 
-  function bindMusicBtn(el, handler) {
-    el?.addEventListener("click", (e) => {
+  function onMusicPauseClick(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (musicUserPaused) resumeAfrobeat();
+    else pauseAfrobeat();
+  }
+
+  function setupMusicControlListeners() {
+    const ids = ["btn-pause-music", "btn-pause-music-dock"];
+    ids.forEach((id) => {
+      document.getElementById(id)?.addEventListener("click", onMusicPauseClick);
+    });
+
+    const playBtn = document.getElementById("btn-start-music");
+    playBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      playSound("tap");
+      startMusicFromTap();
+    });
+
+    const stopHandler = (e) => {
       e.stopPropagation();
       e.preventDefault();
-      playSound("tap");
-      handler(e);
-    });
+      stopAfrobeat();
+      showFakeToast("Soundtrack stopped");
+    };
+    document.getElementById("btn-stop-music")?.addEventListener("click", stopHandler);
+    document.getElementById("btn-stop-music-inline")?.addEventListener("click", stopHandler);
   }
 
   function startEarlyMusicPreload() {
@@ -253,6 +279,7 @@
         setMusicPlayingUI();
         showFakeToast("Now playing");
       }).catch(() => {
+        afrobeatSoundtrackOn = false;
         setMusicStoppedUI();
         showFakeToast("Tap Play again — still loading");
       });
@@ -276,17 +303,12 @@
 
   function pauseAfrobeat() {
     const a = getAfrobeatEl();
-    if (!a || !afrobeatSoundtrackOn) return;
-    musicUserPaused = true;
-    a.pause();
+    if (!a) return;
+    if (!afrobeatSoundtrackOn && !musicIsPlaying) return;
+    try {
+      a.pause();
+    } catch (_) {}
     setMusicPausedUI();
-  }
-
-  function toggleAfrobeatPlayback() {
-    const a = getAfrobeatEl();
-    if (!a || !afrobeatSoundtrackOn) return;
-    if (a.paused) resumeAfrobeat();
-    else pauseAfrobeat();
   }
 
   /** Play button — queues until buffered if needed */
@@ -375,23 +397,14 @@
       showFakeToast(afrobeatErrorMessage());
     });
     a.addEventListener("ended", () => {
+      afrobeatSoundtrackOn = false;
       setMusicStoppedUI();
       $("#power-afrobeat")?.classList.remove("playing");
     });
 
-    bindMusicBtn($("#btn-start-music"), () => startMusicFromTap());
-    bindMusicBtn($("#btn-pause-music"), () => toggleAfrobeatPlayback());
-    bindMusicBtn($("#btn-pause-music-dock"), () => toggleAfrobeatPlayback());
-    bindMusicBtn($("#btn-stop-music"), () => {
-      stopAfrobeat();
-      showFakeToast("Soundtrack stopped");
-    });
-    bindMusicBtn($("#btn-stop-music-inline"), () => {
-      stopAfrobeat();
-      showFakeToast("Soundtrack stopped");
-    });
   }
   setupAfrobeatPlayer();
+  setupMusicControlListeners();
   startEarlyMusicPreload();
 
   // Global tap ripples + emoji on interactive elements (sounds handled per-action)
@@ -400,6 +413,7 @@
     (e) => {
       const t = e.target.closest("button, .power-card, .soft-btn, .text-link, .gallery-img-wrap");
       if (!t || t.id === "sound-toggle") return;
+      if (t.closest("#page4-music, #music-dock")) return;
       tapRipple(e.clientX, e.clientY);
       if (Math.random() > 0.45) maybeFloatEmoji(e.clientX, e.clientY);
     },
