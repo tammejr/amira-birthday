@@ -132,7 +132,6 @@
     <div class="page-inner">
       <h2>Choose your birthday power</h2>
       <p class="game-sub">June 1 upgrade package — pick one, Princess</p>
-      <p class="game-music-hint">Pick <strong>Afrobeat</strong> → tap <strong>▶ Play</strong> at the bottom (or <strong>Next evidence</strong> first — music is optional)</p>
       <div class="power-grid">
         <button class="power-card" data-power="noodles">
           <span class="power-icon">☕</span>
@@ -145,7 +144,6 @@
         <button class="power-card" data-power="afrobeat" id="power-afrobeat">
           <span class="power-icon">🎶</span>
           <span>Permanent Afrobeat soundtrack</span>
-          <span class="power-hint">plays the whole birthday 🎵</span>
         </button>
         <button class="power-card" data-power="dogs">
           <span class="power-icon">🐶</span>
@@ -155,16 +153,14 @@
       <div id="power-response" class="power-response hidden"></div>
 
       <div id="page4-music" class="page4-music hidden">
-        <p class="page4-music-label">🎶 Soundtrack unlocked</p>
-        <div class="page4-music-btns">
-          <button type="button" id="btn-start-music" class="btn btn-primary btn-start-music">▶ Play music</button>
-          <button type="button" id="btn-pause-music" class="btn btn-ghost btn-music-ctrl hidden">⏸ Pause</button>
-          <button type="button" id="btn-stop-music-inline" class="btn btn-ghost btn-music-ctrl hidden">⏹ Stop</button>
+        <button type="button" id="btn-start-music" class="btn btn-primary btn-block">▶ Play music</button>
+        <div id="music-controls-row" class="btn-row hidden">
+          <button type="button" id="btn-pause-music" class="btn btn-yes">⏸ Pause</button>
+          <button type="button" id="btn-stop-music-inline" class="btn btn-ghost btn-inline">⏹ Stop</button>
         </div>
-        <p id="music-load-text" class="music-load-text">Tap play — works even on slow data</p>
       </div>
 
-      <button class="btn btn-primary hidden" id="btn-power-next">Next evidence</button>
+      <button type="button" class="btn btn-primary btn-block hidden" id="btn-power-next">Next evidence</button>
     </div>
   </section>
 
@@ -347,8 +343,10 @@
   <div id="music-dock" class="music-dock hidden" aria-label="Now playing">
     <div class="music-dock-inner music-dock-mini">
       <span class="music-status" id="music-status">Now playing 🎶</span>
-      <button type="button" id="btn-pause-music-dock" class="btn-music-ctrl">⏸</button>
-      <button type="button" id="btn-stop-music" class="btn-music-ctrl">⏹ Stop</button>
+      <div class="btn-row">
+        <button type="button" id="btn-pause-music-dock" class="btn btn-yes">⏸ Pause</button>
+        <button type="button" id="btn-stop-music" class="btn btn-ghost btn-inline">⏹ Stop</button>
+      </div>
     </div>
   </div>
 

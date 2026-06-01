@@ -21,12 +21,13 @@
   let afrobeatReady = false;
   let afrobeatSoundtrackOn = false;
   let musicPreloadStarted = false;
-  let musicForceReadyTimer = null;
+  let musicPlayQueued = false;
+  let afrobeatSrcInited = false;
 
   const powerResponses = {
     noodles: "Unlimited noodles unlocked. PUBG squad will never understand your carb power. Ramen aura: +999. 😭",
     shopping: "Unlimited shopping granted. Tigray to worldwide delivery — danger level now CRITICAL. Your bank account has left the chat.",
-    afrobeat: "Permanent Afrobeat soundtrack ON. The full song follows you through the entire birthday — gallery, finale, everything. Stop anytime with ⏹ at the bottom. Mass story energy: amplified.",
+    afrobeat: "Afrobeat unlocked — tap ▶ Play music. Keeps playing on every page. ⏸ or ⏹ whenever.",
     dogs: "100 dogs now follow you everywhere. They don't judge your PUBG bot moments. They only judge when you pretend you're not soft.",
   };
 
@@ -112,7 +113,8 @@
 
   function initAfrobeatSrc() {
     const a = getAfrobeatEl();
-    if (!a) return;
+    if (!a || afrobeatSrcInited) return;
+    afrobeatSrcInited = true;
     const m4a = new URL("audio/afrobeat.m4a", window.location.href).href;
     const mp3 = new URL("audio/afrobeat.mp3", window.location.href).href;
     const sources = a.querySelectorAll("source");
@@ -144,17 +146,10 @@
 
   function updateMusicLoadUI() {
     const pct = getMusicBufferedPercent();
-    const loadText = $("#music-load-text");
     const pill = $("#music-preload-pill");
     const pillText = $("#music-pill-text");
 
     if (isMusicReadyToPlay()) afrobeatReady = true;
-
-    if (loadText) {
-      loadText.textContent = pct > 0
-        ? `Loading ${pct}% — tap Play anyway`
-        : "Tap ▶ Play music (loads while playing)";
-    }
 
     if (!afrobeatReady && musicPreloadStarted && !afrobeatSoundtrackOn) {
       pill?.classList.remove("hidden");
@@ -168,11 +163,16 @@
     $("#page4-music")?.classList.toggle("hidden", !show);
   }
 
+  function setMusicPlayButtonLabel(text) {
+    const btn = $("#btn-start-music");
+    if (btn) btn.textContent = text;
+  }
+
   function setMusicPlayingUI(playing) {
     $("#btn-start-music")?.classList.toggle("hidden", playing);
-    $("#btn-pause-music")?.classList.toggle("hidden", !playing);
-    $("#btn-stop-music-inline")?.classList.toggle("hidden", !playing);
+    $("#music-controls-row")?.classList.toggle("hidden", !playing);
     $("#power-afrobeat")?.classList.toggle("playing", playing);
+    if (!playing) setMusicPlayButtonLabel("▶ Play music");
     if (playing) {
       showMusicDock(true);
       const s = $("#music-status");
@@ -203,10 +203,28 @@
     if (code === 4) return "File not found — add audio/afrobeat.m4a or afrobeat.mp3";
     if (code === 3) return "Wrong format — rename your file to afrobeat.m4a (see README) or convert to MP3";
     if (code === 2) return "Music file didn't load — check audio/afrobeat.m4a is on the site";
-    return "Music didn't load — tap ▶ Play beat now or use browser player below";
+    return "Music didn't load — tap ▶ Play music again";
   }
 
-  /** Play on button tap — always tappable, no disabled state */
+  function beginAfrobeatPlayback(a) {
+    afrobeatSoundtrackOn = true;
+    musicPlayQueued = false;
+    a.volume = 1;
+    const p = a.play();
+    if (p && typeof p.then === "function") {
+      p.then(() => {
+        setMusicPlayingUI(true);
+        showFakeToast("🎶 Playing — ⏸ or ⏹ anytime");
+      }).catch(() => {
+        setMusicPlayingUI(false);
+        showFakeToast("Tap ▶ Play music again — still loading on slow Wi‑Fi");
+      });
+    } else if (!a.paused) {
+      setMusicPlayingUI(true);
+    }
+  }
+
+  /** Play on ▶ button — queues until buffered if needed */
   function startMusicFromTap() {
     initAudio();
     preloadAfrobeat();
@@ -218,38 +236,31 @@
       return;
     }
 
-    afrobeatSoundtrackOn = true;
-    a.volume = 1;
-
-    const p = a.play();
-    if (p && typeof p.then === "function") {
-      p.then(() => {
-        setMusicPlayingUI(true);
-        $("#power-afrobeat")?.classList.add("playing");
-        showFakeToast("🎶 Playing — use ⏸ or ⏹ anytime");
-      }).catch(() => {
-        setMusicPlayingUI(false);
-        showFakeToast("Try again in a sec — or hit Next and play later");
-      });
-    } else if (!a.paused) {
-      setMusicPlayingUI(true);
+    if (!isMusicReadyToPlay() && a.readyState < 2) {
+      musicPlayQueued = true;
+      setMusicPlayButtonLabel("Loading…");
+      showFakeToast("Loading song… starts when ready");
+      const onReady = () => {
+        if (!musicPlayQueued) return;
+        beginAfrobeatPlayback(a);
+      };
+      a.addEventListener("canplay", onReady, { once: true });
+      a.addEventListener("loadeddata", onReady, { once: true });
+      return;
     }
+
+    beginAfrobeatPlayback(a);
   }
 
   function playAfrobeat() {
-    $("#power-afrobeat")?.classList.add("selected");
     showPage4Music(true);
-    showMusicDock(false);
+    preloadAfrobeat();
     $("#btn-power-next")?.classList.remove("hidden");
-    setMusicPlayingUI(false);
-    updateMusicLoadUI();
-    showFakeToast("▶ Play music below — or tap Next evidence first");
   }
 
   function pauseAfrobeat() {
     getAfrobeatEl()?.pause();
     setMusicPlayingUI(false);
-    $("#btn-start-music")?.classList.remove("hidden");
     $("#power-afrobeat")?.classList.remove("playing");
   }
 
@@ -262,9 +273,14 @@
         a.currentTime = 0;
       } catch (_) {}
     }
+    musicPlayQueued = false;
     setMusicPlayingUI(false);
-    showPage4Music(false);
-    $("#power-afrobeat")?.classList.remove("playing", "selected");
+    if ($("#power-afrobeat")?.classList.contains("selected")) {
+      showPage4Music(true);
+    } else {
+      showPage4Music(false);
+    }
+    $("#power-afrobeat")?.classList.remove("playing");
   }
 
   function setupAfrobeatPlayer() {
@@ -305,7 +321,6 @@
     a.addEventListener("pause", () => {
       if (!a.ended) {
         setMusicPlayingUI(false);
-        $("#btn-start-music")?.classList.remove("hidden");
       }
     });
 
@@ -568,6 +583,7 @@
       if (key === "afrobeat") {
         playAfrobeat();
         setTimeout(() => playSound("powerSelect"), 80);
+        return;
       } else {
         stopAfrobeat();
         showPage4Music(false);
