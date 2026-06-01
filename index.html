@@ -132,7 +132,7 @@
     <div class="page-inner">
       <h2>Choose your birthday power</h2>
       <p class="game-sub">June 1 upgrade package — pick one, Princess</p>
-      <p class="game-music-hint">Pick <strong>Afrobeat</strong> — song loads in the background while she plays. When the button says <strong>▶ Tap to play</strong>, she's good.</p>
+      <p class="game-music-hint">Pick <strong>Afrobeat</strong> → tap <strong>▶ Play</strong> at the bottom (or <strong>Next evidence</strong> first — music is optional)</p>
       <div class="power-grid">
         <button class="power-card" data-power="noodles">
           <span class="power-icon">☕</span>
@@ -153,6 +153,16 @@
         </button>
       </div>
       <div id="power-response" class="power-response hidden"></div>
+
+      <div id="page4-music" class="page4-music hidden">
+        <p class="page4-music-label">🎶 Soundtrack unlocked</p>
+        <div class="page4-music-btns">
+          <button type="button" id="btn-start-music" class="btn btn-primary btn-start-music">▶ Play music</button>
+          <button type="button" id="btn-pause-music" class="btn btn-ghost btn-music-ctrl hidden">⏸ Pause</button>
+          <button type="button" id="btn-stop-music-inline" class="btn btn-ghost btn-music-ctrl hidden">⏹ Stop</button>
+        </div>
+        <p id="music-load-text" class="music-load-text">Tap play — works even on slow data</p>
+      </div>
 
       <button class="btn btn-primary hidden" id="btn-power-next">Next evidence</button>
     </div>
@@ -328,24 +338,17 @@
     👑 PRINCESS MODE UNLOCKED — PUBG bot aura +1000
   </div>
 
-  <!-- Sticky soundtrack — one big tap to play (works on phone + Vercel) -->
-  <div id="music-dock" class="music-dock hidden" aria-label="Birthday soundtrack">
-    <audio id="afrobeat-player" preload="auto" playsinline>
-      <source src="audio/afrobeat.m4a" type="audio/mp4" />
-      <source src="audio/afrobeat.mp3" type="audio/mpeg" />
-    </audio>
-    <div class="music-dock-inner">
-      <p class="music-dock-label">🎶 Princess soundtrack · plays the whole birthday</p>
-      <div id="music-load-wrap" class="music-load-wrap">
-        <p id="music-load-text" class="music-load-text">Loading song in background…</p>
-        <div class="music-load-bar" aria-hidden="true"><div id="music-load-fill" class="music-load-fill"></div></div>
-      </div>
-      <button type="button" id="btn-start-music" class="btn-start-music is-loading" disabled>⏳ Loading song…</button>
-      <div id="music-dock-controls" class="music-dock-controls hidden">
-        <span class="music-status" id="music-status">Playing…</span>
-        <button type="button" id="btn-pause-music" class="btn-music-ctrl" title="Pause">⏸</button>
-        <button type="button" id="btn-stop-music" class="btn-music-ctrl" title="Stop">⏹ Stop</button>
-      </div>
+  <audio id="afrobeat-player" preload="auto" playsinline>
+    <source src="audio/afrobeat.m4a" type="audio/mp4" />
+    <source src="audio/afrobeat.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- Sticky bar only while song is playing (won't block Next button) -->
+  <div id="music-dock" class="music-dock hidden" aria-label="Now playing">
+    <div class="music-dock-inner music-dock-mini">
+      <span class="music-status" id="music-status">Now playing 🎶</span>
+      <button type="button" id="btn-pause-music-dock" class="btn-music-ctrl">⏸</button>
+      <button type="button" id="btn-stop-music" class="btn-music-ctrl">⏹ Stop</button>
     </div>
   </div>
 

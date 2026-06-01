@@ -21,7 +21,7 @@
   let afrobeatReady = false;
   let afrobeatSoundtrackOn = false;
   let musicPreloadStarted = false;
-  let musicPlayWhenReady = false;
+  let musicForceReadyTimer = null;
 
   const powerResponses = {
     noodles: "Unlimited noodles unlocked. PUBG squad will never understand your carb power. Ramen aura: +999. 😭",
@@ -137,54 +137,48 @@
     const a = getAfrobeatEl();
     if (!a) return false;
     if (afrobeatReady) return true;
-    return a.readyState >= 2 || getMusicBufferedPercent() >= 8;
+    if (a.readyState >= 2) return true;
+    if (a.readyState >= 1 && a.buffered.length > 0) return true;
+    return getMusicBufferedPercent() >= 3;
   }
 
   function updateMusicLoadUI() {
     const pct = getMusicBufferedPercent();
-    const ready = isMusicReadyToPlay();
-    const fill = $("#music-load-fill");
     const loadText = $("#music-load-text");
-    const btn = $("#btn-start-music");
-    const wrap = $("#music-load-wrap");
     const pill = $("#music-preload-pill");
     const pillText = $("#music-pill-text");
 
-    if (fill) fill.style.width = `${pct}%`;
+    if (isMusicReadyToPlay()) afrobeatReady = true;
 
-    if (!afrobeatSoundtrackOn && !ready && musicPreloadStarted) {
-      pill?.classList.remove("hidden");
-      if (pillText) {
-        pillText.textContent =
-          pct > 0 ? `🎵 Loading song ${pct}% — Wi‑Fi helps` : "🎵 Loading song…";
-      }
-    } else if (ready) {
-      pill?.classList.add("hidden");
+    if (loadText) {
+      loadText.textContent = pct > 0
+        ? `Loading ${pct}% — tap Play anyway`
+        : "Tap ▶ Play music (loads while playing)";
     }
 
-    if (ready) {
-      afrobeatReady = true;
-      wrap?.classList.add("is-ready");
-      if (loadText) loadText.textContent = "Song ready — tap play 🎶";
-      if (btn) {
-        btn.disabled = false;
-        btn.classList.remove("is-loading");
-        btn.textContent = "▶ Tap to play music";
-      }
-      if (musicPlayWhenReady) {
-        musicPlayWhenReady = false;
-        startMusicFromTap();
-      }
-    } else if (btn) {
-      btn.disabled = true;
-      btn.classList.add("is-loading");
-      btn.textContent = pct > 0 ? `⏳ Loading song… ${pct}%` : "⏳ Loading song…";
-      if (loadText) {
-        loadText.textContent =
-          pct > 0
-            ? `Loading soundtrack… ${pct}% (slow data is OK)`
-            : "Loading soundtrack… stay on Wi‑Fi if you can";
-      }
+    if (!afrobeatReady && musicPreloadStarted && !afrobeatSoundtrackOn) {
+      pill?.classList.remove("hidden");
+      if (pillText) pillText.textContent = pct > 0 ? `🎵 Loading ${pct}%` : "🎵 Loading song…";
+    } else {
+      pill?.classList.add("hidden");
+    }
+  }
+
+  function showPage4Music(show) {
+    $("#page4-music")?.classList.toggle("hidden", !show);
+  }
+
+  function setMusicPlayingUI(playing) {
+    $("#btn-start-music")?.classList.toggle("hidden", playing);
+    $("#btn-pause-music")?.classList.toggle("hidden", !playing);
+    $("#btn-stop-music-inline")?.classList.toggle("hidden", !playing);
+    $("#power-afrobeat")?.classList.toggle("playing", playing);
+    if (playing) {
+      showMusicDock(true);
+      const s = $("#music-status");
+      if (s) s.textContent = "Now playing 🎶";
+    } else {
+      showMusicDock(false);
     }
   }
 
@@ -194,15 +188,6 @@
     initAfrobeatSrc();
     preloadAfrobeat();
     updateMusicLoadUI();
-  }
-
-  function updateMusicDockUI(playing) {
-    $("#btn-start-music")?.classList.toggle("hidden", playing);
-    $("#music-dock-controls")?.classList.toggle("hidden", !playing);
-    const status = $("#music-status");
-    if (status) {
-      status.textContent = playing ? "Now playing 🎶" : "";
-    }
   }
 
   function preloadAfrobeat() {
@@ -221,7 +206,7 @@
     return "Music didn't load — tap ▶ Play beat now or use browser player below";
   }
 
-  /** Call play() directly inside a click handler — required on mobile + Vercel */
+  /** Play on button tap — always tappable, no disabled state */
   function startMusicFromTap() {
     initAudio();
     preloadAfrobeat();
@@ -234,44 +219,37 @@
     }
 
     afrobeatSoundtrackOn = true;
-    showMusicDock(true);
     a.volume = 1;
-
-    if (!isMusicReadyToPlay()) {
-      musicPlayWhenReady = true;
-      updateMusicLoadUI();
-      showFakeToast("Loading song… plays automatically when ready 🎵");
-      return;
-    }
 
     const p = a.play();
     if (p && typeof p.then === "function") {
       p.then(() => {
-        updateMusicDockUI(true);
+        setMusicPlayingUI(true);
         $("#power-afrobeat")?.classList.add("playing");
-        showFakeToast("🎶 Soundtrack ON — keeps playing as you go");
+        showFakeToast("🎶 Playing — use ⏸ or ⏹ anytime");
       }).catch(() => {
-        updateMusicDockUI(false);
-        showFakeToast("Tap ▶ Tap to play music when the button turns red");
+        setMusicPlayingUI(false);
+        showFakeToast("Try again in a sec — or hit Next and play later");
       });
-    } else {
-      updateMusicDockUI(!a.paused);
+    } else if (!a.paused) {
+      setMusicPlayingUI(true);
     }
   }
 
   function playAfrobeat() {
-    afrobeatSoundtrackOn = true;
-    showMusicDock(true);
-    updateMusicLoadUI();
     $("#power-afrobeat")?.classList.add("selected");
-    startMusicFromTap();
+    showPage4Music(true);
+    showMusicDock(false);
+    $("#btn-power-next")?.classList.remove("hidden");
+    setMusicPlayingUI(false);
+    updateMusicLoadUI();
+    showFakeToast("▶ Play music below — or tap Next evidence first");
   }
 
   function pauseAfrobeat() {
     getAfrobeatEl()?.pause();
-    updateMusicDockUI(false);
+    setMusicPlayingUI(false);
     $("#btn-start-music")?.classList.remove("hidden");
-    $("#music-dock-controls")?.classList.add("hidden");
     $("#power-afrobeat")?.classList.remove("playing");
   }
 
@@ -284,8 +262,8 @@
         a.currentTime = 0;
       } catch (_) {}
     }
-    showMusicDock(false);
-    updateMusicDockUI(false);
+    setMusicPlayingUI(false);
+    showPage4Music(false);
     $("#power-afrobeat")?.classList.remove("playing", "selected");
   }
 
@@ -295,40 +273,50 @@
     initAfrobeatSrc();
     startEarlyMusicPreload();
 
+    setTimeout(() => {
+      if (!afrobeatReady) {
+        afrobeatReady = true;
+        updateMusicLoadUI();
+      }
+    }, 5000);
+
     a.addEventListener("progress", updateMusicLoadUI);
     a.addEventListener("loadedmetadata", updateMusicLoadUI);
-    a.addEventListener("canplay", updateMusicLoadUI);
+    a.addEventListener("canplay", () => {
+      afrobeatReady = true;
+      updateMusicLoadUI();
+    });
     a.addEventListener("canplaythrough", () => {
       afrobeatReady = true;
       updateMusicLoadUI();
     });
 
     a.addEventListener("error", () => {
-      showMusicDock(true);
-      updateMusicDockUI(false);
       showFakeToast(afrobeatErrorMessage());
     });
     a.addEventListener("ended", () => {
-      updateMusicDockUI(false);
+      setMusicPlayingUI(false);
       $("#power-afrobeat")?.classList.remove("playing");
     });
     a.addEventListener("play", () => {
-      updateMusicDockUI(true);
+      setMusicPlayingUI(true);
       $("#power-afrobeat")?.classList.add("playing");
     });
     a.addEventListener("pause", () => {
-      if (!a.ended) updateMusicDockUI(false);
+      if (!a.ended) {
+        setMusicPlayingUI(false);
+        $("#btn-start-music")?.classList.remove("hidden");
+      }
     });
 
-    $("#btn-start-music")?.addEventListener("click", () => {
-      startMusicFromTap();
-    });
-
-    $("#btn-pause-music")?.addEventListener("click", () => {
-      pauseAfrobeat();
-    });
-
+    $("#btn-start-music")?.addEventListener("click", () => startMusicFromTap());
+    $("#btn-pause-music")?.addEventListener("click", () => pauseAfrobeat());
+    $("#btn-pause-music-dock")?.addEventListener("click", () => pauseAfrobeat());
     $("#btn-stop-music")?.addEventListener("click", () => {
+      stopAfrobeat();
+      showFakeToast("Soundtrack stopped 😭");
+    });
+    $("#btn-stop-music-inline")?.addEventListener("click", () => {
       stopAfrobeat();
       showFakeToast("Soundtrack stopped 😭");
     });
@@ -582,6 +570,7 @@
         setTimeout(() => playSound("powerSelect"), 80);
       } else {
         stopAfrobeat();
+        showPage4Music(false);
         playSound("powerSelect");
         showFakeToast(`Birthday power assigned to AMIRA: ${key}`);
       }
