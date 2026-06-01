@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AMIRA — Birthday Protocol</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="cursor-sparkles" aria-hidden="true"></div>
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
+
+  <!-- Boot screen -->
+  <div id="boot-screen" class="screen active">
+    <div class="boot-terminal">
+      <p class="boot-line"><span class="prompt">SYSTEM DETECTED:</span></p>
+      <p class="boot-line delay-1">Subject: <span class="highlight">AMIRA</span></p>
+      <p class="boot-line delay-2">Status: <span class="highlight">June 1 Birthday Entity</span></p>
+      <p class="boot-line delay-3">Danger Level: <span class="highlight cherry">Cherry Red Chaos</span></p>
+      <p class="boot-line delay-4">Region: <span class="highlight">Tigray — Main Character Energy</span></p>
+      <p class="boot-line delay-5 blink">Loading birthday protocol…</p>
+      <div class="boot-bar delay-6"><div class="boot-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- PAGE 1 -->
+  <section id="page-1" class="page" data-page="1">
+    <div class="page-inner">
+      <p class="official-banner glitch-text" id="official-banner" data-text="⚠️ OFFICIAL BIRTHDAY VERIFICATION REQUIRED ⚠️">
+        ⚠️ OFFICIAL BIRTHDAY VERIFICATION REQUIRED ⚠️
+      </p>
+      <p class="hint-text hidden" id="no-streak-msg"></p>
+      <p class="sub-meta">Case file #0601 · Subject AMIRA · June 1</p>
+      <button class="btn btn-primary" id="btn-continue">Continue</button>
+      <div id="verify-panel" class="hidden-panel">
+        <p class="verify-question">Confirm you're the soft-hearted angry issue owner known as <span class="princess" id="princess-name">Princess</span>. 😭</p>
+        <div class="btn-row">
+          <button class="btn btn-yes" id="btn-yes">YES</button>
+          <button class="btn btn-no" id="btn-no">NO</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section id="page-2" class="page" data-page="2">
+    <div class="page-inner scan-page">
+      <h2 class="scan-title">Personality Scan</h2>
+      <p class="scan-sub">Subject: AMIRA · DOB June 1</p>
+      <div class="loading-bar-wrap">
+        <p class="loading-label">Analyzing subject…</p>
+        <div class="loading-bar"><div class="loading-bar-fill" id="scan-bar"></div></div>
+      </div>
+      <ul class="scan-results" id="scan-results">
+        <li data-delay="0"><span class="check">✓</span> Cherry red chaos detected</li>
+        <li data-delay="1"><span class="check">✓</span> Afrobeat addiction detected</li>
+        <li data-delay="2"><span class="check">✓</span> Shopping danger level: <strong>HIGH</strong></li>
+        <li data-delay="3"><span class="check">✓</span> Soft heart hidden behind anger issues confirmed 😭</li>
+        <li data-delay="4"><span class="check">✓</span> PUBG bot energy — still drops hot 😭</li>
+        <li data-delay="5"><span class="check">✓</span> TikTok mass-story threat level: chronic</li>
+        <li data-delay="6"><span class="check">✓</span> Tigray pride + accent that should be illegal</li>
+        <li data-delay="7"><span class="check">✓</span> Cares deeply while pretending not to — confirmed</li>
+      </ul>
+      <button class="btn btn-primary hidden" id="btn-scan-next">Proceed to café analysis</button>
+    </div>
+  </section>
+
+  <!-- PAGE 3 — Café -->
+  <section id="page-3" class="page" data-page="3">
+    <div class="cafe-scene" id="cafe-scene">
+      <!-- Your real café photo = background -->
+      <img
+        src="images/cafe-background.jpg"
+        alt=""
+        class="cafe-bg-img"
+        id="cafe-bg-img"
+        onload="document.getElementById('cafe-scene').classList.add('has-bg')"
+        onerror="document.getElementById('cafe-scene').classList.add('no-bg')"
+      />
+
+      <!-- Fallback if no background file (old drawn café) -->
+      <div class="cafe-fallback-drawn" aria-hidden="true">
+        <div class="cafe-window">
+          <div class="cafe-sun"></div>
+        </div>
+        <div class="cafe-interior">
+          <div class="cafe-lamp glow-pulse"></div>
+          <div class="cafe-table"></div>
+        </div>
+      </div>
+
+      <!-- Animations on top of your photo -->
+      <div class="cafe-fx-layer">
+        <div class="cafe-warm-glow" id="cafe-warm-glow"></div>
+        <div class="cafe-vignette"></div>
+        <div class="steam steam-1"></div>
+        <div class="steam steam-2"></div>
+        <div class="steam steam-3"></div>
+        <div class="cafe-music-float calm-only">
+          <span>♪</span><span>♫</span><span>☕</span>
+        </div>
+        <div class="cafe-chaos-layer hidden" id="cafe-chaos"></div>
+        <div class="cafe-students calm calm-only">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="cafe-students chaos hidden" id="cafe-students-chaos">
+          <span>😭</span><span>📱</span><span>☕</span><span>🎵</span>
+        </div>
+      </div>
+
+      <div class="cafe-photo-frame">
+        <img src="images/amira-1.jpg" alt="Amira at the café" class="cafe-photo" id="photo-cafe"
+             onerror="this.parentElement.classList.add('photo-placeholder')" />
+        <span class="photo-placeholder-text">Her photo — images/amira-1.jpg</span>
+      </div>
+    </div>
+    <div class="cafe-text">
+      <h2>Your personality as a place</h2>
+      <p class="cafe-calm">Some weeks you're a calm café near a school in Tigray.</p>
+      <p class="cafe-calm">Quiet students. Music. Soft energy. That accent doing quiet damage.</p>
+      <p class="cafe-chaos-text">Other weeks… <button type="button" class="text-link" id="toggle-chaos">absolute chaotic student energy</button> 😭</p>
+      <button class="btn btn-primary" id="btn-cafe-next">Continue investigation</button>
+    </div>
+  </section>
+
+  <!-- PAGE 4 — Mini game -->
+  <section id="page-4" class="page" data-page="4">
+    <div class="page-inner">
+      <h2>Choose your birthday power</h2>
+      <p class="game-sub">June 1 upgrade package — pick one, Princess</p>
+      <p class="game-music-hint">Tap <strong>Afrobeat</strong> — music plays through the <em>whole</em> birthday (she can ⏹ stop anytime)</p>
+      <div class="power-grid">
+        <button class="power-card" data-power="noodles">
+          <span class="power-icon">☕</span>
+          <span>Unlimited noodles</span>
+        </button>
+        <button class="power-card" data-power="shopping">
+          <span class="power-icon">🛍️</span>
+          <span>Unlimited shopping</span>
+        </button>
+        <button class="power-card" data-power="afrobeat" id="power-afrobeat">
+          <span class="power-icon">🎶</span>
+          <span>Permanent Afrobeat soundtrack</span>
+          <span class="power-hint">plays the whole birthday 🎵</span>
+        </button>
+        <button class="power-card" data-power="dogs">
+          <span class="power-icon">🐶</span>
+          <span>100 dogs following you everywhere</span>
+        </button>
+      </div>
+      <div id="power-response" class="power-response hidden"></div>
+
+      <button class="btn btn-primary hidden" id="btn-power-next">Next evidence</button>
+    </div>
+  </section>
+
+  <!-- PAGE 5 — Photos -->
+  <section id="page-5" class="page" data-page="5">
+    <div class="page-inner gallery-page">
+      <h2>Classified visual evidence</h2>
+      <p class="gallery-sub">AMIRA · June 1 dossier · eyes only</p>
+      <div class="photo-gallery">
+        <figure class="gallery-card reveal">
+          <div class="gallery-img-wrap">
+            <img src="images/amira-1.jpg" alt="Amira photo 1"
+                 onerror="this.closest('.gallery-img-wrap').classList.add('photo-placeholder')" />
+            <span class="photo-placeholder-text">images/amira-1.jpg</span>
+          </div>
+          <figcaption>Meanwhile this person still thinks she isn't dangerous.</figcaption>
+        </figure>
+        <figure class="gallery-card reveal delay">
+          <div class="gallery-img-wrap">
+            <img src="images/amira-2.jpg" alt="Amira photo 2"
+                 onerror="this.closest('.gallery-img-wrap').classList.add('photo-placeholder')" />
+            <span class="photo-placeholder-text">images/amira-2.jpg</span>
+          </div>
+          <figcaption>Cherry red energy in human form 😭</figcaption>
+        </figure>
+      </div>
+      <p class="gallery-extra">Bonus intel: PUBG bot who still talks like she won. TikTok stories that could be a series. Doesn't care until she cares <em>too</em> much.</p>
+      <button class="btn btn-primary" id="btn-gallery-next">Emergency investigation</button>
+    </div>
+  </section>
+
+  <!-- PAGE 6 — Question -->
+  <section id="page-6" class="page" data-page="6">
+    <div class="page-inner">
+      <div class="fake-alert">
+        <span class="alert-icon">🚨</span>
+        <span>EMERGENCY BIRTHDAY INVESTIGATION — CASE AMIRA-0601</span>
+      </div>
+      <h2>How soft-hearted are you ACTUALLY?</h2>
+      <p class="question-sub">Wrong answers will be documented. Playfully.</p>
+      <div class="soft-options">
+        <button class="soft-btn wrong" data-answer="not">Not soft.</button>
+        <button class="soft-btn wrong" data-answer="little">A little soft.</button>
+        <button class="soft-btn wrong" data-answer="very">Very soft.</button>
+        <button class="soft-btn correct" data-answer="literal">I literally feel bad after getting angry 😭</button>
+      </div>
+      <p id="roast-msg" class="roast-msg hidden"></p>
+      <button class="btn btn-primary hidden" id="btn-question-next">Unlock reward</button>
+    </div>
+  </section>
+
+  <!-- June 1 timeline -->
+  <section id="page-timeline" class="page" data-page="timeline">
+    <div class="page-inner timeline-page">
+      <div class="timeline-date">June 1</div>
+      <p class="timeline-lead">The day the world accidentally unlocked:</p>
+      <ul class="timeline-list">
+        <li>soft heart + anger issues combo</li>
+        <li>perfume obsession</li>
+        <li>chaotic café personality</li>
+        <li>clingy/stubborn balance</li>
+        <li>dangerous cherry red energy</li>
+        <li>Tigray main character energy</li>
+        <li>PUBG bot with main-character confidence</li>
+      </ul>
+      <button class="btn btn-ghost" id="btn-june-secret">Why June 1 matters</button>
+      <p id="june-secret-text" class="june-secret hidden"></p>
+      <button class="btn btn-primary" id="btn-timeline-next">Open final file</button>
+    </div>
+  </section>
+
+  <!-- Final -->
+  <section id="page-final" class="page" data-page="final">
+    <canvas id="confetti-canvas"></canvas>
+    <div class="page-inner final-page">
+      <div id="typewriter-block" class="typewriter-block"></div>
+      <div id="final-message" class="final-message hidden">
+        <h1>Happy Birthday, <span class="name-glow">Amira</span> ❤️</h1>
+        <p class="final-date">June 1 looks better because your story started on it.</p>
+
+        <div class="cute-messages">
+          <p class="cute-line">You're my favourite chaos in human form.</p>
+          <p class="cute-line">Soft heart, loud attitude — wouldn't change you.</p>
+          <p class="cute-line">Long distance but you're still my person. Always.</p>
+          <p class="cute-line">Princess energy from Tigray to everywhere you go. 👑</p>
+        </div>
+
+        <div class="video-wish" id="video-wish">
+          <h3 class="video-wish-title">A little wish for you 🎂</h3>
+          <p class="video-wish-sub">You'll know why I picked this one 😭</p>
+          <div class="video-wrap">
+            <video id="birthday-video" controls playsinline preload="metadata" poster="">
+              <source src="videos/birthday-wish.mp4" type="video/mp4" />
+            </video>
+            <p class="video-missing hidden" id="video-missing">
+              Nate: drop your TikTok video here as <code>videos/birthday-wish.mp4</code>
+            </p>
+          </div>
+        </div>
+
+        <p class="final-thanks">Thank you for being your weird mix of:<br />
+          softness, chaos, shopping energy, perfumes, afrobeat playlists,<br />
+          dogs, noodles, hidden care, PUBG confidence, TikTok stories,<br />
+          that accent, and that heart that feels more deeply than it admits.</p>
+        <div class="birthday-file">
+          <p class="file-header">═══ BIRTHDAY FILE ═══</p>
+          <p><span>Name:</span> AMIRA</p>
+          <p><span>DOB:</span> June 1</p>
+          <p><span>Known Aliases:</span> Princess / Mama</p>
+          <p><span>Favourite Colors:</span> Cherry Red & Black</p>
+          <p><span>Origin:</span> Tigray — Ethiopia</p>
+          <p><span>Threat Level:</span> Soft-hearted chaos 😭</p>
+          <p><span>Special Ability:</span> Gets angry fast → feels bad fast.</p>
+          <p><span>Side Quest:</span> Mass story on TikTok · Bot in PUBG · Legend in group chat</p>
+        </div>
+        <p class="from-nate">— From your long-distance bestie who thinks you're worth every pixel on this page —</p>
+
+        <div class="save-section">
+          <p class="save-hint">Keep this on your phone forever 💾</p>
+          <button type="button" class="btn btn-primary btn-save" id="btn-save-gallery">
+            Save birthday card to gallery
+          </button>
+          <p class="save-done hidden" id="save-done">Saved! Check your photos 📸</p>
+        </div>
+
+        <button type="button" class="btn btn-ghost btn-confetti-toggle hidden" id="btn-confetti-toggle">
+          ✨ Calm the confetti
+        </button>
+      </div>
+      <div class="dog-easter" id="dog-surprise" title="tap the dog">🐶</div>
+    </div>
+  </section>
+
+  <!-- Easter eggs -->
+  <button type="button" class="easter-amira" id="amira-exe" title="AMIRA.exe">AMIRA.exe</button>
+  <div id="amira-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>AMIRA.exe Analysis</h3>
+      <ul class="amira-breakdown">
+        <li><strong>A</strong> — Afrobeat addiction detected 🎵</li>
+        <li><strong>M</strong> — Main character shopping energy 🛍️</li>
+        <li><strong>I</strong> — Impossible to stay mad for too long 😭</li>
+        <li><strong>R</strong> — Red + black chaos aesthetic ❤️🖤</li>
+        <li><strong>A</strong> — Actually soft-hearted under the attitude</li>
+      </ul>
+      <button class="btn btn-ghost modal-close">Close</button>
+    </div>
+  </div>
+
+  <div id="fake-toast" class="fake-toast hidden"></div>
+  <div id="dog-toast" class="fake-toast hidden"></div>
+  <div id="tap-ripples" aria-hidden="true"></div>
+  <div id="float-emoji-layer" aria-hidden="true"></div>
+
+  <button type="button" id="sound-toggle" class="sound-toggle" title="Sound on/off" aria-label="Toggle sound">
+    <span class="sound-on">🔊</span>
+    <span class="sound-off hidden">🔇</span>
+  </button>
+  <button type="button" id="secret-cake" class="secret-cake" title="?">🎂</button>
+
+  <div id="chaos-overlay" class="chaos-overlay hidden">
+    <p>CHERRY RED OVERLOAD</p>
+    <span>AMIRA.exe has stopped caring (but still cares secretly)</span>
+  </div>
+
+  <div id="princess-mode-banner" class="princess-mode-banner hidden">
+    👑 PRINCESS MODE UNLOCKED — PUBG bot aura +1000
+  </div>
+
+  <!-- Sticky soundtrack — stays on every page after Afrobeat power -->
+  <div id="music-dock" class="music-dock hidden" aria-label="Birthday soundtrack">
+    <div class="music-dock-inner">
+      <span class="music-dock-icon" aria-hidden="true">🎶</span>
+      <div class="music-dock-text">
+        <span class="music-dock-title">Princess soundtrack</span>
+        <span class="music-dock-hint">Plays through the whole gift · ⏹ to stop</span>
+      </div>
+      <audio id="afrobeat-player" controls preload="metadata" playsinline>
+        <source src="audio/afrobeat.m4a" type="audio/mp4" />
+        <source src="audio/afrobeat.mp3" type="audio/mpeg" />
+      </audio>
+      <button type="button" id="btn-stop-music" class="btn-stop-music" title="Stop music">⏹</button>
+    </div>
+  </div>
+
+  <script src="sounds.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
