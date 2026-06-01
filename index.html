@@ -131,7 +131,7 @@
   <section id="page-4" class="page" data-page="4">
     <div class="page-inner">
       <h2>Choose your birthday power</h2>
-      <p class="game-sub">June 1 upgrade package — pick one, Princess</p>
+      <p class="game-sub">June 1 upgrade package</p>
       <div class="power-grid">
         <button class="power-card" data-power="noodles">
           <span class="power-icon">☕</span>
@@ -153,10 +153,10 @@
       <div id="power-response" class="power-response hidden"></div>
 
       <div id="page4-music" class="page4-music hidden">
-        <button type="button" id="btn-start-music" class="btn btn-primary btn-block">▶ Play music</button>
-        <div id="music-controls-row" class="btn-row hidden">
-          <button type="button" id="btn-pause-music" class="btn btn-yes">⏸ Pause</button>
-          <button type="button" id="btn-stop-music-inline" class="btn btn-ghost btn-inline">⏹ Stop</button>
+        <button type="button" id="btn-start-music" class="btn btn-primary btn-block">Play</button>
+        <div id="music-controls-row" class="music-controls hidden">
+          <button type="button" id="btn-pause-music" class="btn btn-music-secondary">Pause</button>
+          <button type="button" id="btn-stop-music-inline" class="btn btn-music-outline">Stop</button>
         </div>
       </div>
 
@@ -316,7 +316,7 @@
   <div id="float-emoji-layer" aria-hidden="true"></div>
 
   <div id="music-preload-pill" class="music-preload-pill hidden" aria-live="polite">
-    <span id="music-pill-text">🎵 Loading song…</span>
+    <span id="music-pill-text">Loading song…</span>
   </div>
 
   <button type="button" id="sound-toggle" class="sound-toggle" title="Sound on/off" aria-label="Toggle sound">
@@ -342,10 +342,10 @@
   <!-- Sticky bar only while song is playing (won't block Next button) -->
   <div id="music-dock" class="music-dock hidden" aria-label="Now playing">
     <div class="music-dock-inner music-dock-mini">
-      <span class="music-status" id="music-status">Now playing 🎶</span>
-      <div class="btn-row">
-        <button type="button" id="btn-pause-music-dock" class="btn btn-yes">⏸ Pause</button>
-        <button type="button" id="btn-stop-music" class="btn btn-ghost btn-inline">⏹ Stop</button>
+      <span class="music-status" id="music-status">Now playing</span>
+      <div class="music-controls music-controls-dock">
+        <button type="button" id="btn-pause-music-dock" class="btn btn-music-secondary">Pause</button>
+        <button type="button" id="btn-stop-music" class="btn btn-music-outline">Stop</button>
       </div>
     </div>
   </div>
